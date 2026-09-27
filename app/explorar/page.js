@@ -31,6 +31,7 @@ function ExplorarInner() {
   const filtered = useMemo(() => {
     return jobs
       .filter((j) => {
+        if (j.status === "cancelada") return false;
         const matchCat = cat === "todo" || j.category === cat;
         const q = query.trim().toLowerCase();
         const matchQ =
@@ -242,7 +243,7 @@ function JobCard({ job, now }) {
             <button
               type="button"
               className="btn-primary h-11 flex-1 text-[15px]"
-              disabled={applied || Boolean(job.assignment)}
+              disabled={applied}
               onClick={() => applyToJob(job.id)}
             >
               {applied ? "Enviada" : "Aplicar"}

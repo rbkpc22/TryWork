@@ -14,9 +14,16 @@ export default function PrivacidadPage() {
           dentro de la app para conectar trabajadores con empleadores cercanos.
         </p>
         <p className="mt-3">
-          La geolocalización se usa únicamente para mostrar trabajos próximos y
-          el seguimiento activo de un trabajo aceptado. Puedes desactivarla en
-          cualquier momento desde tu dispositivo.
+          La geolocalización se usa para mostrar trabajos próximos, el mapa y el
+          seguimiento de un trabajo activo. La dirección exacta del servicio se
+          acuerda en el chat. Si mantienes SOS 3 segundos y confirmas, esa
+          ubicación se comparte con tus contactos de emergencia y con el equipo
+          de TRYWORK.
+        </p>
+        <p className="mt-3">
+          La verificación de identidad usa el nombre, la foto y la identificación
+          que envías desde Perfil. No marcamos un perfil como verificado hasta
+          revisar esos datos.
         </p>
         <p className="mt-3">
           No vendemos tu información. Compartimos datos mínimos con la
@@ -24,8 +31,10 @@ export default function PrivacidadPage() {
           aproximada) para que la coordinación sea posible.
         </p>
         <p className="mt-3">
-          Los pagos se procesan mediante métodos tokenizados. TRYWORK no
-          almacena el número completo de tu tarjeta.
+          Los pagos del trabajo se cobran en la app. No operamos pagos en
+          efectivo para esas ofertas. TRYWORK no almacena el número completo de
+          tu tarjeta. La comisión del 10% y el BOOST opcional se muestran antes
+          de pagarlos.
         </p>
       </div>
     </Screen>

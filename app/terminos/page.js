@@ -23,7 +23,7 @@ export default function TerminosPage() {
             <Icon name="gavel" size={24} color="#FF8A00" />
           </div>
           <h2 className="mt-3 text-[22px] font-extrabold">Términos y Condiciones</h2>
-          <p className="mt-1 text-[12px] text-zinc-400">Última actualización: 24 Octubre, 2023</p>
+          <p className="mt-1 text-[12px] text-zinc-400">Última actualización: 26 de septiembre de 2026</p>
         </div>
 
         <article className="mt-6 space-y-5 text-[13px] leading-5 text-zinc-600">
@@ -40,10 +40,9 @@ export default function TerminosPage() {
           <section>
             <h3 className="mb-1 font-bold text-zinc-900">2. Elegibilidad</h3>
             <p>
-              Para utilizar los servicios de TRYWORK, debes tener al menos 18 años
-              de edad y la capacidad legal para celebrar contratos vinculantes. Al
-              registrarte, garantizas que toda la información proporcionada es veraz
-              y precisa.
+              TRYWORK también es para adolescentes. Puedes registrarte sin ser
+              mayor de edad. Al crear la cuenta, garantizas que la información
+              que das es veraz y precisa.
             </p>
           </section>
           <section>
@@ -51,39 +50,90 @@ export default function TerminosPage() {
             <p>
               TRYWORK actúa exclusivamente como una plataforma tecnológica de
               intermediación. No somos una agencia de empleo ni empleadores
-              directos. La relación laboral se establece directamente entre el
-              Trabajador y el Empleador.
+              directos. La relación se establece entre quien publica la oferta
+              (“Empleador”) y quien la realiza (“Trabajador”).
             </p>
             <ul className="mt-2 list-disc pl-4">
               <li>No garantizamos la calidad del trabajo realizado.</li>
-              <li>No garantizamos el pago fuera de la plataforma si se acuerda así.</li>
-              <li>Recomendamos siempre verificar referencias dentro de la app.</li>
+              <li>El pago de un trabajo publicado aquí se cobra dentro de la app.</li>
+              <li>Las reseñas del perfil sirven para revisar referencias.</li>
             </ul>
           </section>
           <section>
-            <h3 className="mb-1 font-bold text-zinc-900">4. Pagos y Tarifas</h3>
+            <h3 className="mb-1 font-bold text-zinc-900">4. Pagos y comisiones</h3>
             <p>
-              Los pagos pueden procesarse a través de la plataforma o acordarse
-              en efectivo. TRYWORK puede cobrar una tarifa de servicio por cada
-              transacción exitosa conectada a través de la aplicación, la cual será
-              visible antes de confirmar el trabajo.
+              No se acepta efectivo ni un pago fuera de TRYWORK para un trabajo
+              acordado en la app. La comisión solo puede cobrarse si el pago pasa
+              por la plataforma.
+            </p>
+            <ul className="mt-2 list-disc pl-4">
+              <li>
+                Quien publica paga el monto del trabajador más una comisión del
+                10% de ese monto. Quien aplica solo ve lo que va a recibir.
+              </li>
+              <li>
+                Destacar una oferta (BOOST) es opcional, dura 24 horas y cuesta el
+                20% del pago al trabajador. La cuenta regresiva solo la ve quien
+                publicó.
+              </li>
+              <li>
+                TRYWORK no guarda el número completo de la tarjeta. El cobro se
+                muestra antes de confirmar.
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3 className="mb-1 font-bold text-zinc-900">5. Cancelación, disputas y reseñas</h3>
+            <p>
+              Quien publicó, o quien ya fue elegido, puede cancelar desde el
+              detalle del trabajo mientras no exista una hora acordada. Si ya hay
+              hora acordada, la cancelación se pide a soporte antes de que empiece
+              el tiempo.
+            </p>
+            <p className="mt-2">
+              Si el servicio no se cumple, cualquiera de las dos personas puede
+              escribir a soporte desde Ayuda. Revisamos el chat, la hora acordada
+              y el pago registrado en la app. Con eso el pago puede retenerse o
+              devolverse. Al cerrar el trabajo, ambas partes pueden dejar una
+              reseña.
             </p>
           </section>
           <section>
-            <h3 className="mb-1 font-bold text-zinc-900">5. Seguridad y Conducta</h3>
+            <h3 className="mb-1 font-bold text-zinc-900">6. Verificación de identidad</h3>
             <p>
-              Esperamos que todos los usuarios mantengan un comportamiento
-              profesional y respetuoso. Nos reservamos el derecho de suspender o
-              eliminar cuentas que violen nuestras normas de comunidad, reportes
-              de acoso, o actividades fraudulentas.
+              La verificación no es automática. Desde Perfil se solicita la
+              revisión de nombre, foto e identificación oficial. Hasta que
+              TRYWORK la apruebe, el perfil permanece sin verificar o en revisión.
             </p>
           </section>
           <section>
-            <h3 className="mb-1 font-bold text-zinc-900">6. Privacidad de Datos</h3>
+            <h3 className="mb-1 font-bold text-zinc-900">7. Mapa, ubicación y SOS</h3>
             <p>
-              Tu privacidad es importante para nosotros. Recopilamos y procesamos
-              tus datos personales de acuerdo con nuestra Política de Privacidad,
-              incluyendo geolocalización para conectar trabajos cercanos.
+              El mapa sirve para mostrar trabajos cercanos. En un trabajo activo,
+              Seguimiento usa la ubicación del momento. La dirección exacta del
+              servicio se acuerda en el chat y no se publica en la oferta.
+            </p>
+            <p className="mt-2">
+              En Seguimiento hay un botón SOS. Hay que mantenerlo 3 segundos y
+              confirmar. La alerta incluye la ubicación de ese momento y se envía
+              a los contactos de emergencia y al equipo de TRYWORK. Es solo para
+              una emergencia real.
+            </p>
+          </section>
+          <section>
+            <h3 className="mb-1 font-bold text-zinc-900">8. Seguridad y conducta</h3>
+            <p>
+              Esperamos un trato profesional y respetuoso. Podemos suspender
+              cuentas por acoso, fraude o por intentar cobrar un trabajo de la
+              app fuera de la plataforma.
+            </p>
+          </section>
+          <section>
+            <h3 className="mb-1 font-bold text-zinc-900">9. Privacidad de datos</h3>
+            <p>
+              Tratamos nombre, foto, contacto, identificaciones enviadas a
+              verificación, actividad y ubicación según la Política de Privacidad,
+              incluso la ubicación que viaja con una alerta SOS.
             </p>
           </section>
           <p className="py-4 text-center text-[11px] tracking-[0.2em] text-zinc-300">

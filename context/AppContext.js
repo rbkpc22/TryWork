@@ -46,7 +46,14 @@ export function AppProvider({ children }) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        setState({ ...initialState, ...parsed });
+        const users = Array.isArray(parsed.users)
+          ? parsed.users.map((u) =>
+              u.id === DEMO_USER.id && u.password === "123456"
+                ? { ...u, password: DEMO_USER.password }
+                : u
+            )
+          : parsed.users;
+        setState({ ...initialState, ...parsed, users });
       }
     } catch {
       /* ignore */
@@ -141,6 +148,12 @@ export function AppProvider({ children }) {
   const api = {
     hydrated,
     user,
+    accounts: state.users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      avatar: u.avatar,
+    })),
     jobs: state.jobs,
     accepted: state.accepted,
     conversations: state.conversations,
@@ -162,21 +175,36 @@ export function AppProvider({ children }) {
         return false;
       }
       const id = `user-${Date.now()}`;
+      const provider = data.authProvider || "email";
       const newUser = {
-        ...DEMO_USER,
-        ...data,
         id,
+        name: data.name,
+        age: data.age || "",
+        phone: data.phone || "",
+        email: data.email,
+        password: provider === "email" ? data.password : null,
+        location: data.location || "Ciudad de México, MX",
+        avatar: data.avatar,
+        profession:
+          data.role === "empleador" ? "Empleador" : data.profession || "Profesional independiente",
+        role: data.role || "trabajador",
+        authProvider: provider,
+        rating: 5,
         reviews: 0,
         reviewsList: [],
-        rating: 5,
         completedPct: 100,
+        rate: 0,
         verified: false,
+        verification: "pendiente",
+        specialties: [],
+        paymentMethods: [],
         history: [],
       };
       setState((s) => ({
         ...s,
         users: [...s.users, newUser],
         session: id,
+        termsAccepted: true,
       }));
       showToast("Cuenta creada correctamente");
       return true;
@@ -184,21 +212,87 @@ export function AppProvider({ children }) {
     login(identifier, password) {
       const found = state.users.find(
         (u) =>
-          (u.email.toLowerCase() === identifier.toLowerCase() ||
-            u.phone === identifier) &&
-          u.password === password
+          u.email.toLowerCase() === identifier.toLowerCase() || u.phone === identifier
       );
-      if (!found) {
+      if (!found || !found.password || found.password !== password) {
+        if (found?.authProvider === "google" || found?.authProvider === "apple") {
+          const label = found.authProvider === "google" ? "Google" : "Apple";
+          showToast(`Esta cuenta entra con ${label}`);
+          return false;
+        }
         showToast("Correo, teléfono o contraseña incorrectos");
         return false;
       }
       setState((s) => ({ ...s, session: found.id }));
       return true;
     },
+    loginWithProvider(email, provider) {
+      const found = state.users.find(
+        (u) => u.email.toLowerCase() === String(email || "").toLowerCase()
+      );
+      if (!found) return "missing";
+      if (found.authProvider !== provider) {
+        const social = found.authProvider === "google" || found.authProvider === "apple";
+        showToast(
+          social
+            ? `Esa cuenta entra con ${found.authProvider === "google" ? "Google" : "Apple"}`
+            : "Esa cuenta usa correo y contraseña"
+        );
+        return false;
+      }
+      setState((s) => ({ ...s, session: found.id }));
+      return true;
+    },
+    cancelJob(jobId) {
+      const job = state.jobs.find((j) => j.id === jobId);
+      if (!job || job.status === "cancelada") return false;
+      const isPoster = job.publishedBy === state.session;
+      const isWorker = job.assignment?.workerId === state.session;
+      if (!isPoster && !isWorker) {
+        showToast("Solo quien publica o quien fue elegido puede cancelar");
+        return false;
+      }
+      if (job.assignment?.agreedAt) {
+        showToast("Ya hay hora acordada. Escríbele a soporte desde Ayuda para cancelar.");
+        return false;
+      }
+      const otherId = isPoster ? job.assignment?.workerId : job.publishedBy;
+      setState((s) => ({
+        ...s,
+        jobs: s.jobs.map((j) =>
+          j.id === jobId ? { ...j, status: "cancelada", nextApplicantAt: null } : j
+        ),
+        notifications: [
+          ...(otherId
+            ? [
+                {
+                  id: `n-${Date.now()}`,
+                  title: "Trabajo cancelado",
+                  body: `“${job.title}” se canceló antes de acordar la hora.`,
+                  time: "Ahora",
+                  read: false,
+                  href: `/trabajos/${jobId}`,
+                  forUser: otherId,
+                },
+              ]
+            : []),
+          ...s.notifications,
+        ],
+      }));
+      showToast("Trabajo cancelado. No hubo pago fuera de la app.");
+      return true;
+    },
     logout() {
       setState((s) => ({ ...s, session: null }));
     },
-    updateProfile(patch) {
+    switchAccount(userId) {
+      const found = state.users.find((u) => u.id === userId);
+      if (!found) return false;
+      setState((s) => ({ ...s, session: found.id }));
+      showToast(`Entraste como ${found.name}`);
+      return true;
+    },
+    updateProfile(patch, toast) {
       if (!state.session) return;
       setState((s) => ({
         ...s,
@@ -206,7 +300,7 @@ export function AppProvider({ children }) {
           u.id === s.session ? { ...u, ...patch } : u
         ),
       }));
-      showToast("Perfil actualizado");
+      showToast(toast || "Perfil actualizado");
     },
     publishJob(job) {
       const id = `job-${Date.now()}`;
@@ -256,12 +350,12 @@ export function AppProvider({ children }) {
     applyToJob(jobId) {
       const job = state.jobs.find((j) => j.id === jobId);
       if (!job || !user) return false;
-      if (job.publishedBy === state.session) {
-        showToast("No puedes aplicar a tu propia oferta");
+      if (job.status === "cancelada") {
+        showToast("Este trabajo fue cancelado");
         return false;
       }
-      if (job.assignment) {
-        showToast("Esta oferta ya tiene a alguien elegido");
+      if (job.publishedBy === state.session) {
+        showToast("No puedes aplicar a tu propia oferta");
         return false;
       }
       if ((job.applicants || []).some((a) => a.userId === state.session)) {
@@ -385,11 +479,11 @@ export function AppProvider({ children }) {
       }
       const applicant = (job.applicants || []).find((a) => a.userId === workerUserId);
       if (!applicant) return null;
-      if (job.assignment) {
-        showToast("Ya elegiste a alguien para esta oferta");
+      if (job.assignment?.workerId === workerUserId) {
         return job.assignment.chatId;
       }
       const chatId = `chat-${jobId}-${workerUserId}`;
+      const chatExists = state.conversations.some((c) => c.id === chatId);
       const conv = {
         id: chatId,
         jobId,
@@ -411,7 +505,7 @@ export function AppProvider({ children }) {
       };
       setState((s) => ({
         ...s,
-        conversations: [conv, ...s.conversations],
+        conversations: chatExists ? s.conversations : [conv, ...s.conversations],
         jobs: s.jobs.map((j) =>
           j.id === jobId
             ? {
@@ -543,14 +637,16 @@ export function AppProvider({ children }) {
       const mineIsPoster = chat && state.session === chat.posterId;
       const otherId = mineIsPoster ? chat.workerId : chat?.posterId;
       const otherName = mineIsPoster ? chat.workerName : chat?.posterName || chat?.name;
-      const reply = otherName
-        ? casualReply(text, {
-            name: otherName,
-            jobTitle: job?.title || "el trabajo",
-            location: job?.assignment?.exactLocation || job?.location || "el punto que marques",
-            payLabel: job?.payLabel || "lo acordado",
-          })
-        : null;
+      const otherIsAccount = state.users.some((u) => u.id === otherId);
+      const reply =
+        otherName && !otherIsAccount
+          ? casualReply(text, {
+              name: otherName,
+              jobTitle: job?.title || "el trabajo",
+              location: job?.assignment?.exactLocation || job?.location || "el punto que marques",
+              payLabel: job?.payLabel || "lo acordado",
+            })
+          : null;
       setState((s) => ({
         ...s,
         conversations: s.conversations.map((c) =>
@@ -573,6 +669,20 @@ export function AppProvider({ children }) {
               }
             : c
         ),
+        notifications: otherIsAccount
+          ? [
+              {
+                id: `n-${userMsgId}`,
+                title: `Mensaje de ${user?.name || "Alguien"}`,
+                body: text,
+                time: "Ahora",
+                read: false,
+                href: `/mensajes/${chatId}`,
+                forUser: otherId,
+              },
+              ...s.notifications,
+            ]
+          : s.notifications,
       }));
       if (!reply) return;
       window.setTimeout(() => {

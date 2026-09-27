@@ -23,7 +23,7 @@ export default function ChatPage() {
 function ChatInner() {
   const { id } = useParams();
   const router = useRouter();
-  const { user, jobs, conversations, sendMessage, agreeSchedule, showToast } = useApp();
+  const { user, jobs, conversations, accounts, sendMessage, agreeSchedule, showToast } = useApp();
   const chat = conversations.find((c) => c.id === id);
   const job = jobs.find((j) => j.id === chat?.jobId);
   const [text, setText] = useState("");
@@ -50,6 +50,9 @@ function ChatInner() {
       : chat.workerId && user.id === chat.workerId
         ? { name: chat.posterName, avatar: chat.posterAvatar, role: "Cliente" }
         : { name: chat.name, avatar: chat.avatar, role: chat.role };
+  const otherId =
+    user.id === chat.posterId ? chat.workerId : chat.posterId;
+  const otherIsAccount = accounts.some((a) => a.id === otherId);
   const canAgree =
     job?.assignment &&
     (job.publishedBy === user.id || job.assignment.workerId === user.id);
@@ -111,7 +114,10 @@ function ChatInner() {
       <div ref={scroller} className="page-scroll min-h-0 flex-1 px-4 pt-3">
         {chat.messages.length === 0 ? (
           <p className="py-10 text-center text-[13px] leading-5 text-zinc-400">
-            Escribe lo que quieras. {peer.name.split(" ")[0]} te contesta.
+            Escribe lo que quieras.{" "}
+            {otherIsAccount
+              ? `${peer.name.split(" ")[0]} lo ve cuando entre a su cuenta.`
+              : `${peer.name.split(" ")[0]} te contesta.`}
           </p>
         ) : (
           <p className="mb-4 text-center text-[11px] text-zinc-400">Hoy</p>

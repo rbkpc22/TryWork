@@ -19,7 +19,7 @@ export default function JobDetailPage() {
 function JobDetailInner() {
   const { id } = useParams();
   const router = useRouter();
-  const { user, jobs, applyToJob, hireApplicant } = useApp();
+  const { user, jobs, applyToJob, hireApplicant, cancelJob } = useApp();
   const job = jobs.find((j) => j.id === id);
   const mine = job?.publishedBy === user.id;
   const applicants = job?.applicants || [];
@@ -63,12 +63,17 @@ function JobDetailInner() {
             <p className="text-[12px] font-bold" style={{ color: "#FF8A00" }}>
               {job.categoryLabel}
             </p>
-            <h2 className="text-[24px] font-extrabold leading-7">{job.title}</h2>
-          </div>
+        <h2 className="text-[24px] font-extrabold leading-7">{job.title}</h2>
+            </div>
           <p className="text-[16px] font-extrabold" style={{ color: "#FF8A00" }}>
             {job.payLabel}
           </p>
         </div>
+        {job.status === "cancelada" ? (
+          <p className="mt-3 rounded-2xl bg-zinc-100 px-4 py-3 text-[13px] font-semibold text-zinc-500">
+            Este trabajo se canceló antes de acordar la hora. El pago no salió de la app.
+          </p>
+        ) : null}
         <div className="mt-3 space-y-2 text-[14px] text-zinc-500">
           <p className="flex items-center gap-2">
             <Icon name="pin" size={16} color="#FF8A00" /> {job.location}
@@ -103,6 +108,15 @@ function JobDetailInner() {
               <span style={{ color: "#FF8A00" }}>{money(job.total ?? Number(job.pay) * 1.1)}</span>
             </p>
           </div>
+        ) : null}
+        {mine && job.status !== "cancelada" && !job.assignment?.agreedAt ? (
+          <button
+            type="button"
+            className="mt-3 w-full py-3 text-[13px] font-bold text-zinc-400"
+            onClick={() => cancelJob(job.id)}
+          >
+            Cancelar trabajo
+          </button>
         ) : null}
 
         <div className="mt-5 flex items-center gap-3 rounded-3xl bg-[#f7f8fa] p-3">
@@ -145,11 +159,11 @@ function JobDetailInner() {
                         </span>
                       ) : null}
                     </div>
-                    {a.status === "elegido" && job.assignment?.chatId ? (
+                    {a.status === "elegido" && job.assignment?.workerId === a.userId && job.assignment?.chatId ? (
                       <Link href={`/mensajes/${job.assignment.chatId}`} className="btn-primary mt-3 h-11 text-[14px]">
                         Abrir chat
                       </Link>
-                    ) : !job.assignment ? (
+                    ) : a.userId !== job.assignment?.workerId ? (
                       <button
                         type="button"
                         className="btn-primary mt-3 h-11 text-[14px]"
@@ -158,7 +172,7 @@ function JobDetailInner() {
                           if (chatId) router.push(`/mensajes/${chatId}`);
                         }}
                       >
-                        Elegir
+                        {job.assignment ? "Elegir en su lugar" : "Elegir"}
                       </button>
                     ) : null}
                   </div>
@@ -185,6 +199,15 @@ function JobDetailInner() {
             <Link href={`/seguimiento/${job.id}`} className="mt-3 block text-[13px] font-bold text-emerald-700">
               Ver tiempo de la tarea
             </Link>
+            {!job.assignment?.agreedAt && job.status !== "cancelada" ? (
+              <button
+                type="button"
+                className="mt-2 w-full py-2 text-[13px] font-bold text-zinc-400"
+                onClick={() => cancelJob(job.id)}
+              >
+                Cancelar antes de la hora
+              </button>
+            ) : null}
           </div>
         ) : myApplication ? (
           <div className="mt-5 rounded-3xl bg-[#f7f8fa] p-4 text-center">
@@ -197,10 +220,10 @@ function JobDetailInner() {
           <button
             type="button"
             className="btn-primary mt-5"
-            disabled={Boolean(job.assignment)}
+            disabled={job.status === "cancelada"}
             onClick={() => applyToJob(job.id)}
           >
-            Aplicar a este trabajo
+            {job.status === "cancelada" ? "Trabajo cancelado" : "Aplicar a este trabajo"}
           </button>
         )}
       </div>

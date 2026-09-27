@@ -243,7 +243,7 @@ export const DEMO_USER = {
   age: "28",
   phone: "5512345678",
   email: "alex@trywork.com",
-  password: "123456",
+  password: "Alex1234",
   location: "Ciudad de México, MX",
   avatar:
     "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",

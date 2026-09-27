@@ -9,15 +9,34 @@ import { useApp } from "@/context/AppContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useApp();
+  const { login, loginWithProvider, showToast } = useApp();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [provider, setProvider] = useState(null);
+  const [socialEmail, setSocialEmail] = useState("");
 
   function onSubmit(e) {
     e.preventDefault();
     if (!identifier || !password) return;
     if (login(identifier, password)) router.push("/explorar");
+  }
+
+  function continueSocial(e) {
+    e.preventDefault();
+    const email = socialEmail.trim();
+    if (!email || !provider) {
+      showToast("Escribe el correo de esa cuenta");
+      return;
+    }
+    const result = loginWithProvider(email, provider);
+    if (result === true) {
+      router.push("/explorar");
+      return;
+    }
+    if (result === "missing") {
+      router.push(`/registro?proveedor=${provider}&email=${encodeURIComponent(email)}`);
+    }
   }
 
   return (
@@ -39,7 +58,46 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-8 flex flex-col gap-2">
+          <button
+            type="button"
+            className="flex h-12 items-center justify-center rounded-full border border-zinc-200 text-[14px] font-bold"
+            onClick={() => setProvider("google")}
+          >
+            Continuar con Google
+          </button>
+          <button
+            type="button"
+            className="flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-zinc-900 text-[14px] font-bold text-white"
+            onClick={() => setProvider("apple")}
+          >
+            Continuar con Apple
+          </button>
+        </div>
+
+        {provider ? (
+          <div className="mt-4 rounded-3xl bg-[#f7f8fa] p-4">
+            <p className="text-[13px] font-extrabold">
+              Correo de tu cuenta {provider === "apple" ? "Apple" : "Google"}
+            </p>
+            <div className="field mt-3">
+              <Icon name="mail" size={18} color="#C0C6D0" />
+              <input
+                type="email"
+                value={socialEmail}
+                onChange={(e) => setSocialEmail(e.target.value)}
+                placeholder="tu@correo.com"
+              />
+            </div>
+            <button type="button" className="btn-primary mt-3" onClick={continueSocial}>
+              Continuar
+            </button>
+          </div>
+        ) : null}
+
+        <p className="mt-5 text-center text-[12px] text-zinc-400">o con correo y contraseña</p>
+
+        <div className="mt-4">
           <label className="label">Correo o Teléfono</label>
           <div className="field">
             <Icon name="mail" size={18} color="#C0C6D0" />
@@ -84,10 +142,6 @@ export default function LoginPage() {
           <Link href="/registro" className="font-bold" style={{ color: "#FF8A00" }}>
             Regístrate
           </Link>
-        </p>
-
-        <p className="mt-8 text-center text-[11px] text-zinc-400">
-          Demo: alex@trywork.com · 123456
         </p>
       </form>
     </Screen>

@@ -16,7 +16,7 @@ export default function PerfilPage() {
 
 function PerfilInner() {
   const router = useRouter();
-  const { user, history, jobs, logout, showToast, updateProfile } = useApp();
+  const { user, history, jobs, accounts, logout, switchAccount, showToast, updateProfile } = useApp();
 
   const myJobs = jobs.filter(
     (j) => j.publishedBy === user.id || j.assignment?.workerId === user.id
@@ -46,14 +46,18 @@ function PerfilInner() {
               <Icon name="check" size={12} color="#fff" />
             </span>
             <button
+              type="button"
               className="absolute -left-6 top-2 rounded-full px-3 py-1 text-[11px] font-bold text-white"
-              style={{ background: "#22c55e" }}
+              style={{ background: user.verified ? "#22c55e" : user.verification === "revision" ? "#2f80ed" : "#22c55e" }}
+              disabled={user.verified || user.verification === "revision"}
               onClick={() => {
-                updateProfile({ verified: true });
-                showToast("Perfil verificado");
+                updateProfile(
+                  { verification: "revision" },
+                  "Recibimos tu solicitud. Revisamos tu identificación antes de marcarte como verificado."
+                );
               }}
             >
-              Verificar perfil
+              {user.verified ? "Verificado" : user.verification === "revision" ? "En revisión" : "Solicitar verificación"}
             </button>
           </div>
           <h2 className="mt-3 text-[22px] font-extrabold">{user.name}</h2>
@@ -146,7 +150,9 @@ function PerfilInner() {
               {myJobs.map((job) => {
                 const mine = job.publishedBy === user.id;
                 const agreed = job.assignment?.agreedAt;
-                const detail = mine
+                const detail = job.status === "cancelada"
+                  ? "Cancelado"
+                  : mine
                   ? job.assignment
                     ? agreed
                       ? "Hora acordada"
@@ -158,7 +164,7 @@ function PerfilInner() {
                 return (
                 <Link
                   key={job.id}
-                  href={job.assignment ? `/seguimiento/${job.id}` : `/trabajos/${job.id}`}
+                  href={job.status === "cancelada" || !job.assignment ? `/trabajos/${job.id}` : `/seguimiento/${job.id}`}
                   className="block rounded-[24px] bg-white p-4 shadow-soft"
                 >
                   <p className="font-bold">{job.title}</p>
@@ -202,6 +208,38 @@ function PerfilInner() {
             >
               + Agregar nuevo método
             </button>
+          </div>
+        </section>
+
+        <section className="mt-6">
+          <h3 className="mb-1 font-extrabold">Cuentas en este dispositivo</h3>
+          <p className="mb-3 text-[12px] leading-5 text-zinc-400">
+            Cambia de cuenta para aplicar, elegir y contestar con la otra persona.
+          </p>
+          <div className="space-y-2">
+            {accounts.map((account) => {
+              const current = account.id === user.id;
+              return (
+                <button
+                  key={account.id}
+                  type="button"
+                  disabled={current}
+                  onClick={() => {
+                    if (switchAccount(account.id)) router.push("/explorar");
+                  }}
+                  className="flex w-full items-center gap-3 rounded-[22px] bg-white p-3 text-left shadow-soft"
+                >
+                  <Avatar src={account.avatar} size={40} alt={account.name} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-bold">{account.name}</span>
+                    <span className="block truncate text-[12px] text-zinc-400">{account.email}</span>
+                  </span>
+                  <span className="text-[11px] font-bold" style={{ color: current ? "#22c55e" : "#FF8A00" }}>
+                    {current ? "Activa" : "Entrar"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
